@@ -23,18 +23,16 @@ be publicly released.
 
 The Ref-lerf dataset is accessible for download via the following link：https://pan.baidu.com/s/1l8gco3gRwcHUFLXHzne0WA?pwd=7an0 
 
----
+
 
 ## Cloning the Repository
 ```bash
 git clone https://github.com/jgq111/ReferSplat.git
 
----
 
 ## Training
-
 python train.py -s data/figurines -m output/figurines
----
+
 
 ## Render
 python render.py -m output/waldo_kitchen
