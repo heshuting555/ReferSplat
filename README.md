@@ -21,9 +21,7 @@ task and 3D open-vocabulary segmentation benchmarks. Code, trained models, and t
 be publicly released.
 
 ## Datasets
-
-The Ref-lerf dataset is accessible for download via the following link：https://pan.baidu.com/s/1l8gco3gRwcHUFLXHzne0WA?pwd=7an0 
-
+The **RefLERF dataset** is accessible for download via the following link:https://pan.baidu.com/s/1l8gco3gRwcHUFLXHzne0WA?pwd=7an0 
 
 
 ## Cloning the Repository
@@ -32,8 +30,10 @@ git clone https://github.com/jgq111/ReferSplat.git
 
 
 ## Training
+```bash
 python train.py -s data/figurines -m output/figurines
 
 
 ## Render
+```bash
 python render.py -m output/waldo_kitchen
