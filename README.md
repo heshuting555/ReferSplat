@@ -1,7 +1,24 @@
 # ReferSplat
 
 ---
-
+##Abstract
+We introduce Referring 3D Gaussian Splatting
+Segmentation (R3DGS), a new task that focuses
+on segmenting target objects in a 3D Gaussian
+scene based on natural language descriptions.
+This task requires the model to identify newly
+described objects that may be occluded or not
+directly visible in a novel view, posing a significant challenge for 3D multi-modal understanding. Developing this capability is crucial for advancing embodied AI. To support research in this
+area, we construct the first R3DGS dataset, RefLERF. Our analysis reveals that 3D multi-modal
+understanding and spatial relationship modeling
+are key challenges for R3DGS. To address these
+challenges, we propose ReferSplat, a framework
+that explicitly models 3D Gaussian points with
+natural language expressions in a spatially aware
+paradigm. ReferSplat achieves state-of-the-art
+performance on both the newly proposed R3DGS
+task and 3D open-vocabulary segmentation benchmarks. Code, trained models, and the dataset will
+be publicly released.
 ## Datasets
 
 The Ref-lerf dataset is accessible for download via the following link：https://pan.baidu.com/s/1l8gco3gRwcHUFLXHzne0WA?pwd=7an0 
