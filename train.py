@@ -3,7 +3,7 @@ import torch
 import matplotlib.pyplot as plt
 from random import randint
 from utils.loss_utils import l1_loss, ssim,bce_loss,dice_loss,multi_pos_cross_entropy
-from gaussian_renderer import render, network_gui
+from gaussian_renderer import render
 import sys
 from scene import Scene, GaussianModel
 from utils.general_utils import safe_state
@@ -61,42 +61,39 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
                 render_pkg = render(viewpoint_cam, gaussians, pipe, background, opt,sentence=viewpoint_cam.sentence[i],ratio=ratio)
                 language_feature,mean_tensor=render_pkg["language_feature_image"],render_pkg["mean_tensor"]
                 if opt.include_feature:
-                    # features=gaussians.mlp1(text_feature)
-                    # features=torch.mean(features, dim=1)
-                    # mean_tensor=F.normalize(mean_tensor,dim=1)
-                    # features=F.normalize(features,dim=1)
-                    # #cosine_similarities=torch.matmul(mean_tensor,features.T)/0.07.to("cuda")
+                    features=gaussians.mlp1(text_feature)
+                    features=torch.mean(features, dim=1)
+                    mean_tensor=F.normalize(mean_tensor,dim=1)
+                    features=F.normalize(features,dim=1)
 
-                    # cosine_similarities=(torch.matmul(mean_tensor,features.T)/0.1).to("cuda")
+                    cosine_similarities=(torch.matmul(mean_tensor,features.T)/0.1).to("cuda")
                     
-                    # sentence_tensor = torch.zeros(len(viewpoint_cam.sentence))
-                    # #cosine_similarities=F.cosine_similarity(features,mean_tensor,dim=1).unsqueeze(0).to("cuda")
+                    sentence_tensor = torch.zeros(len(viewpoint_cam.sentence))
                     
-                    # sentence_tensor[i] = 1
-                    # current_category = viewpoint_cam.category[i]
-                    # category_indices = [idx for idx, cat in enumerate(viewpoint_cam.category) if cat == current_category]
-                    # sentence_tensor[category_indices] = 1
-                    # sentence_tensor = sentence_tensor.unsqueeze(0).to("cuda")
-                    # com_loss = multi_pos_cross_entropy(cosine_similarities, sentence_tensor)
+                    sentence_tensor[i] = 1
+                    current_category = viewpoint_cam.category[i]
+                    category_indices = [idx for idx, cat in enumerate(viewpoint_cam.category) if cat == current_category]
+                    sentence_tensor[category_indices] = 1
+                    sentence_tensor = sentence_tensor.unsqueeze(0).to("cuda")
+                    com_loss = multi_pos_cross_entropy(cosine_similarities, sentence_tensor)
                     gt_mask = viewpoint_cam.gt_mask[viewpoint_cam.category[i]].to("cuda")
-                    #loss = bce_loss(language_feature, gt_mask)+0.1*com_loss
-                    loss = bce_loss(language_feature, gt_mask)
+                    loss = bce_loss(language_feature, gt_mask)+0.1*com_loss
                     loss.backward()
                     gaussians.optimizer.step()
                     gaussians.optimizer.zero_grad(set_to_none = True)
                 iter_end.record()
                 iteration+=1
-                # if iteration%2000==0 and ratio>0.005:
-                #     ratio=ratio*0.6
-                #     if ratio<0.005:
-                #         ratio=0.005
+                if iteration%2000==0 and ratio>0.005:
+                    ratio=ratio*0.6
+                    if ratio<0.005:
+                        ratio=0.005
                 with torch.no_grad():
                     ema_loss_for_log = 0.4*loss.item()+0.6*ema_loss_for_log
                     if iteration % 10 == 0:
                         progress_bar.set_postfix({"Loss": f"{ema_loss_for_log:.{7}f}"})
                         progress_bar.update(10)
                         total_loss.append(ema_loss_for_log)
-        # if epoch%4==0:
+        
         torch.save((gaussians.capture(opt.include_feature), iteration), scene.model_path + "/chkpnt_cbasetea251" + str(epoch) + ".pth")
     progress_bar.close()
     
@@ -122,11 +119,9 @@ if __name__ == "__main__":
     args.model_path = args.model_path
     print("Optimizing " + args.model_path)
 
-    # Initialize system state (RNG)
     safe_state(args.quiet)
     epoch_num=5
     torch.autograd.set_detect_anomaly(args.detect_anomaly)
     training(lp.extract(args), op.extract(args), pp.extract(args), args.test_iterations, args.save_iterations, args.checkpoint_iterations, args.start_checkpoint, args.debug_from,epoch_num)
 
-    # All done
     print("\nTraining complete.")

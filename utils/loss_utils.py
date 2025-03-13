@@ -1,13 +1,3 @@
-#
-# Copyright (C) 2023, Inria
-# GRAPHDECO research group, https://team.inria.fr/graphdeco
-# All rights reserved.
-#
-# This software is free for non-commercial, research and evaluation use 
-# under the terms of the LICENSE.md file.
-#
-# For inquiries contact  george.drettakis@inria.fr
-#
 
 import torch
 import torch.nn.functional as F
@@ -68,14 +58,6 @@ def multi_pos_cross_entropy(pred,
                             weight=None,
                             reduction='mean',
                             avg_factor=None):
-    # element-wise losses
-    # pos_inds = (label == 1).float()
-    # neg_inds = (label == 0).float()
-    # exp_pos = (torch.exp(-1 * pred) * pos_inds).sum(dim=1)
-    # exp_neg = (torch.exp(pred.clamp(max=80)) * neg_inds).sum(dim=1)
-    # loss = torch.log(1 + exp_pos * exp_neg)
-
-    # a more numerical stable implementation.
     pos_inds = (label == 1)
     neg_inds = (label == 0)
     pred_pos = pred * pos_inds.float()

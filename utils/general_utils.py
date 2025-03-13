@@ -140,20 +140,15 @@ def safe_state(silent):
 
     sys.stdout = F(silent)
 
-    # random.seed(0)
-    # np.random.seed(0)
-    # torch.manual_seed(0)
-    # 设置Python的随机种子
     random.seed(42)
 
-    # 设置NumPy的随机种子
+
     np.random.seed(42)
 
-    # 设置PyTorch的随机种子
     torch.manual_seed(42)
     torch.cuda.manual_seed(42)
     torch.cuda.manual_seed_all(42)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-    #torch.cuda.set_device(torch.device("cuda:5"))
+
 

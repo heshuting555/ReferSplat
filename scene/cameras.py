@@ -1,13 +1,4 @@
-#
-# Copyright (C) 2023, Inria
-# GRAPHDECO research group, https://team.inria.fr/graphdeco
-# All rights reserved.
-#
-# This software is free for non-commercial, research and evaluation use 
-# under the terms of the LICENSE.md file.
-#
-# For inquiries contact  george.drettakis@inria.fr
-#
+
 import os
 import pickle
 import torch
@@ -83,7 +74,6 @@ class Camera(nn.Module):
             mask = mask[3:4].reshape(1, self.image_height, self.image_width)
         else:
             raise ValueError("feature_level=", feature_level)
-        # point_feature = torch.cat((point_feature2, point_feature3, point_feature4), dim=-1).to('cuda')
         point_feature = point_feature1.reshape(self.image_height, self.image_width, -1).permute(2, 0, 1)
        
         return point_feature.cuda(), mask.cuda()

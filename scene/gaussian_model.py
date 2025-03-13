@@ -1,13 +1,3 @@
-#
-# Copyright (C) 2023, Inria
-# GRAPHDECO research group, https://team.inria.fr/graphdeco
-# All rights reserved.
-#
-# This software is free for non-commercial, research and evaluation use 
-# under the terms of the LICENSE.md file.
-#
-# For inquiries contact  george.drettakis@inria.fr
-#
 
 import torch
 import numpy as np
@@ -25,7 +15,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import BertTokenizer, BertModel
 import math
-from .cross_attention import MLP1,MLP2,MLP3,CrossAttention,MLP4,MLP5,MLP6  
+from .cross_attention import MLP1,MLP2,MLP3,CrossAttention  
 
                        
 class GaussianModel:
@@ -63,10 +53,7 @@ class GaussianModel:
         self.mlp2=MLP2(16,128).to("cuda")
         self.mlp3=MLP3(3,128).to("cuda")
         self.mlp1=MLP1(1024,128).to("cuda")
-        self.mlp4=MLP4(1,128).to("cuda")
-        self.mlp5=MLP5(4,128).to("cuda")
-        self.mlp6=MLP6(32,128).to("cuda")
-        #self.MLP8=MLP8().to("cuda")
+
         
         self.max_radii2D = torch.empty(0)
         self.xyz_gradient_accum = torch.empty(0)
@@ -93,7 +80,6 @@ class GaussianModel:
     
     def capture(self, include_feature=False):
         if include_feature:
-            #assert self._language_feature is not None, "没有设置language feature"
             return (
                 self.active_sh_degree,
                 self._xyz,
@@ -111,9 +97,6 @@ class GaussianModel:
                 self.mlp1.state_dict(),
                 self.mlp2.state_dict(),
                 self.mlp3.state_dict(),
-                self.mlp4.state_dict(),
-                self.mlp5.state_dict(),
-                self.mlp6.state_dict(),
                 self.cross_attention.state_dict(),
             )
         else:
@@ -133,7 +116,7 @@ class GaussianModel:
             )            
     
     def restore(self, model_args, training_args, mode='train'):
-        if len(model_args) == 20: # 这是一个feature训练时保存的ckpt
+        if len(model_args) == 17:
             (self.active_sh_degree, 
             self._xyz, 
             self._features_dc, 
@@ -151,19 +134,13 @@ class GaussianModel:
             mlp1_params,
             mlp2_params,
             mlp3_params,
-            mlp4_params,
-            mlp5_params,
-            mlp6_params,
             cross_attention_params,
             ) = model_args
             self.mlp1.load_state_dict(mlp1_params)
             self.mlp2.load_state_dict(mlp2_params)
             self.mlp3.load_state_dict(mlp3_params)
-            self.mlp4.load_state_dict(mlp4_params)
-            self.mlp5.load_state_dict(mlp5_params)
-            self.mlp6.load_state_dict(mlp6_params)
             self.cross_attention.load_state_dict(cross_attention_params)
-        elif len(model_args) == 11: # 这是一个feature训练时保存的ckpt
+        elif len(model_args) == 11: 
             (self.active_sh_degree, 
             self._xyz, 
             self._features_dc, 
@@ -177,7 +154,7 @@ class GaussianModel:
             denom,
             opt_dict, 
             self.spatial_lr_scale) = model_args
-        elif len(model_args) == 12: # 这是一个不训练feature保存的ckpt
+        elif len(model_args) == 12: 
             (self.active_sh_degree, 
             self._xyz, 
             self._features_dc, 
@@ -191,8 +168,6 @@ class GaussianModel:
             opt_dict, 
             self.spatial_lr_scale) = model_args
            
-            # if not training_args.include_feature: # 如果是以原始gs为初始化来训练feature的话，就不需要restore optimizer
-            #     self.optimizer.load_state_dict(opt_dict)
         
         if mode == 'train':
             self.training_setup(training_args)
@@ -258,7 +233,6 @@ class GaussianModel:
         rots[:, 0] = 1
 
         opacities = inverse_sigmoid(0.1 * torch.ones((fused_point_cloud.shape[0], 1), dtype=torch.float, device="cuda"))
-        # language_feature = torch.zeros((fused_point_cloud.shape[0], 512), device="cuda")
         
         self._xyz = nn.Parameter(fused_point_cloud.requires_grad_(True))
         self._features_dc = nn.Parameter(features[:,:,0:1].transpose(1, 2).contiguous().requires_grad_(True))
@@ -266,8 +240,7 @@ class GaussianModel:
         self._scaling = nn.Parameter(scales.requires_grad_(True))
         self._rotation = nn.Parameter(rots.requires_grad_(True))
         self._opacity = nn.Parameter(opacities.requires_grad_(True))
-        # self._language_feature = nn.Parameter(language_feature.requires_grad_(True))
-        # 在从pointcloud初始化的时候是再训练原始gs的时候，这个时候不需要进行feature的初始化
+        
         self.max_radii2D = torch.zeros((self.get_xyz.shape[0]), device="cuda")
 
     def training_setup(self, training_args):
@@ -277,11 +250,7 @@ class GaussianModel:
         
         if training_args.include_feature:
             if self._language_feature is None or self._language_feature.shape[0] != self._xyz.shape[0]:
-                # 开始feature训练的时候，往模型中加入language feature参数
-                #language_feature = torch.zeros((self._xyz.shape[0], 1), device="cuda")
-                #language_feature = torch.zeros((self._xyz.shape[0], 4), device="cuda")
                 language_feature = torch.zeros((self._xyz.shape[0], 16), device="cuda")
-                #language_feature = torch.zeros((self._xyz.shape[0], 32), device="cuda")
                 self._language_feature = nn.Parameter(language_feature.requires_grad_(True))
                 
             l = [
@@ -289,9 +258,6 @@ class GaussianModel:
                  {'params': self.mlp1.parameters(), 'lr': training_args.mlp_lr, "name": "mlp1"},
                  {'params': self.mlp2.parameters(), 'lr': training_args.mlp_lr, "name": "mlp2"},
                  {'params': self.mlp3.parameters(), 'lr': training_args.mlp_lr, "name": "mlp3"},
-                 {'params': self.mlp4.parameters(), 'lr': training_args.mlp_lr, "name": "mlp4"},
-                 {'params': self.mlp5.parameters(), 'lr': training_args.mlp_lr, "name": "mlp5"},
-                 {'params': self.mlp6.parameters(), 'lr': training_args.mlp_lr, "name": "mlp6"},
                  {'params': self.cross_attention.parameters(), 'lr': training_args.mlp_lr, "name": "cross_attention"},
             ]
             self._xyz.requires_grad_(False)
@@ -301,11 +267,6 @@ class GaussianModel:
             self._rotation.requires_grad_(False)
             self._opacity.requires_grad_(False)
         self.optimizer = torch.optim.Adam(l, eps=1e-15)
-        #self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=600, eta_min=0.0001)
-        # self.xyz_scheduler_args = get_expon_lr_func(lr_init=training_args.position_lr_init*self.spatial_lr_scale,
-        #                                             lr_final=training_args.position_lr_final*self.spatial_lr_scale,
-        #                                             lr_delay_mult=training_args.position_lr_delay_mult,
-        #                                             max_steps=training_args.position_lr_max_steps)
 
     def update_learning_rate(self, iteration):
         ''' Learning rate scheduling per step '''
@@ -473,18 +434,15 @@ class GaussianModel:
         "f_dc": new_features_dc,
         "f_rest": new_features_rest,
         "opacity": new_opacities,
-        # "language_feature": new_language_feature,
         "scaling" : new_scaling,
         "rotation" : new_rotation}
 
         optimizable_tensors = self.cat_tensors_to_optimizer(d)
         
         self._xyz = optimizable_tensors["xyz"]
-        # print(self._xyz.shape[0])
         self._features_dc = optimizable_tensors["f_dc"]
         self._features_rest = optimizable_tensors["f_rest"]
         self._opacity = optimizable_tensors["opacity"]
-        # self._language_feature = optimizable_tensors["language_feature"]
         self._scaling = optimizable_tensors["scaling"]
         self._rotation = optimizable_tensors["rotation"]
 
@@ -511,7 +469,6 @@ class GaussianModel:
         new_features_dc = self._features_dc[selected_pts_mask].repeat(N,1,1)
         new_features_rest = self._features_rest[selected_pts_mask].repeat(N,1,1)
         new_opacity = self._opacity[selected_pts_mask].repeat(N,1)
-        # new_language_feature = self._language_feature[selected_pts_mask].repeat(N,1)
 
         self.densification_postfix(new_xyz, new_features_dc, new_features_rest, new_opacity, new_scaling, new_rotation)
 
@@ -528,7 +485,6 @@ class GaussianModel:
         new_features_dc = self._features_dc[selected_pts_mask]
         new_features_rest = self._features_rest[selected_pts_mask]
         new_opacities = self._opacity[selected_pts_mask]
-        # new_language_feature = self._language_feature[selected_pts_mask]
         new_scaling = self._scaling[selected_pts_mask]
         new_rotation = self._rotation[selected_pts_mask]
 

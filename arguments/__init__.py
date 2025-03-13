@@ -1,14 +1,3 @@
-#
-# Copyright (C) 2023, Inria
-# GRAPHDECO research group, https://team.inria.fr/graphdeco
-# All rights reserved.
-#
-# This software is free for non-commercial, research and evaluation use 
-# under the terms of the LICENSE.md file.
-#
-# For inquiries contact  george.drettakis@inria.fr
-#
-
 from argparse import ArgumentParser, Namespace
 import sys
 import os
@@ -92,44 +81,37 @@ class OptimizationParams(ParamGroup):
         self.densify_until_iter = 15_000
         self.densify_grad_threshold = 0.0002
         self.text_language_feature_lr = 0.0025
-        #self.mlp_lr = 0.000725
-        #self.mlp_lr = 0.001
-        #self.mlp_lr = 0.0005
         self.mlp_lr = 0.0001
         self.cross_attention_lr = 0.0001
         self.language_feature_lr = 0.0025
-        #self.mlp_lr = 0.001
         super().__init__(parser, "Optimization Parameters")
 
 def get_combined_args(parser : ArgumentParser):
-    # 获取命令行参数(不包括脚本名称)
+   
     cmdlne_string = sys.argv[1:]
-    # 初始化配置文件字符串为空的Namespace
+    
     cfgfile_string = "Namespace()"
-    # 解析命令行参数
+    
     args_cmdline = parser.parse_args(cmdlne_string)
 
     try:
-        # 尝试从model_path中读取配置文件
+        
         cfgfilepath = os.path.join(args_cmdline.model_path, "cfg_args")
         print("Looking for config file in", cfgfilepath)
         with open(cfgfilepath) as cfg_file:
             print("Config file found: {}".format(cfgfilepath))
-            # 读取配置文件内容
+            
             cfgfile_string = cfg_file.read()
     except TypeError:
         print("Config file not found at")
         pass
-    # 将配置文件字符串转换为Namespace对象
+    
     args_cfgfile = eval(cfgfile_string)
-    #print('args_cfgfile:', args_cfgfile)
-
-    # 合并配置文件和命令行参数
-    # 首先复制配置文件中的所有参数
+    
     merged_dict = vars(args_cfgfile).copy()
-    # 遍历命令行参数,如果不为None则覆盖配置文件中的对应值
+    
     for k,v in vars(args_cmdline).items():
         if v != None:
             merged_dict[k] = v
-    # 将合并后的字典转换为Namespace对象并返回
+    
     return Namespace(**merged_dict)

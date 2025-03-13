@@ -82,48 +82,4 @@ class MLP3(nn.Module):
         x = self.fc3(x)
         return x    
 
-class MLP4(nn.Module):
-    def __init__(self, in_dim=1, out_dim=128):
-        super(MLP4, self).__init__()
-        self.fc1 = nn.Linear(in_dim, 32)
-        self.fc2 = nn.Linear(32 ,64)
-        self.fc3 = nn.Linear(64, 128)
-        
-    def forward(self, x):
-        x = F.relu(self.fc1(x))
-        
-        x = F.relu(self.fc2(x))
-        
-        x = self.fc3(x)
-        return x 
-    
 
-class MLP5(nn.Module):
-    def __init__(self, in_dim=4, out_dim=128):
-        super(MLP5, self).__init__()
-        self.fc1 = nn.Linear(in_dim, 32)
-        self.fc2 = nn.Linear(32 ,64)
-        self.fc3 = nn.Linear(64, 128)
-        
-    def forward(self, x):
-        x = F.relu(self.fc1(x))
-        
-        x = F.relu(self.fc2(x))
-        
-        x = self.fc3(x)
-        return x 
-    
-class MLP6(nn.Module):
-    def __init__(self, in_dim=32, out_dim=128):
-        super(MLP6, self).__init__()
-        self.fc1 = nn.Linear(in_dim, 32)
-        self.fc2 = nn.Linear(32 ,64)
-        self.fc3 = nn.Linear(64, 128)
-        
-    def forward(self, x):
-        x = F.relu(self.fc1(x))
-        
-        x = F.relu(self.fc2(x))
-        
-        x = self.fc3(x)
-        return x 

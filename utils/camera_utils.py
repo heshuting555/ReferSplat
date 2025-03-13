@@ -1,13 +1,3 @@
-#
-# Copyright (C) 2023, Inria
-# GRAPHDECO research group, https://team.inria.fr/graphdeco
-# All rights reserved.
-#
-# This software is free for non-commercial, research and evaluation use 
-# under the terms of the LICENSE.md file.
-#
-# For inquiries contact  george.drettakis@inria.fr
-#
 
 from scene.cameras import Camera
 import numpy as np
@@ -42,22 +32,13 @@ def loadCam(args, id, cam_info, resolution_scale):
     resized_image_rgb = PILtoTorch(cam_info.image, resolution)
     gt_mask=resized_mask
     sentence=cam_info.sentence
-    # with open('gt_mask.txt', 'w') as f:
-    #     f.write(','.join(map(str, cam_info.gt_mask.getdata())))
+
     
     gt_image = resized_image_rgb[:3, ...]
     loaded_mask = None
-    #print('gt_mask:', gt_mask)
+    
     if resized_image_rgb.shape[1] == 4:
         loaded_mask = resized_image_rgb[3:4, ...]
-    # print('cam_info.uid:', cam_info.uid)
-    # print('cam_info.R:', cam_info.R)
-    # print('cam_info.T:', cam_info.T)
-    # print('cam_info.FovX:', cam_info.FovX)
-    # print('cam_info.FovY:', cam_info.FovY)
-    # print('cam_info.image_name:', cam_info.image_name)
-    # print('cam_info.uid:', cam_info.uid)
-    # print('id:', id)
     return Camera(colmap_id=cam_info.uid, R=cam_info.R, T=cam_info.T, 
                   FoVx=cam_info.FovX, FoVy=cam_info.FovY,sentence=sentence, 
                   image=gt_image, gt_alpha_mask=loaded_mask,gt_mask=gt_mask,
