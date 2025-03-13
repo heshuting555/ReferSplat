@@ -9,10 +9,10 @@ scene based on natural language descriptions.
 This task requires the model to identify newly
 described objects that may be occluded or not
 directly visible in a novel view, posing a significant challenge for 3D multi-modal understanding. Developing this capability is crucial for advancing embodied AI. To support research in this
-area, we construct the first R3DGS dataset, RefLERF. Our analysis reveals that 3D multi-modal
+area, we construct the first R3DGS dataset, **RefLERF**. Our analysis reveals that 3D multi-modal
 understanding and spatial relationship modeling
 are key challenges for R3DGS. To address these
-challenges, we propose ReferSplat, a framework
+challenges, we propose **ReferSplat**, a framework
 that explicitly models 3D Gaussian points with
 natural language expressions in a spatially aware
 paradigm. ReferSplat achieves state-of-the-art
