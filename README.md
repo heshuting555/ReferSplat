@@ -29,9 +29,12 @@ The Ref-lerf dataset is accessible for download via the following link：https:/
 ```bash
 git clone https://github.com/jgq111/ReferSplat.git
 
+---
+
 ## Training
 
 python train.py -s data/figurines -m output/figurines
+---
 
 ## Render
 python render.py -m output/waldo_kitchen
