@@ -19,6 +19,7 @@ paradigm. ReferSplat achieves state-of-the-art
 performance on both the newly proposed R3DGS
 task and 3D open-vocabulary segmentation benchmarks. Code, trained models, and the dataset will
 be publicly released.
+
 ## Datasets
 
 The Ref-lerf dataset is accessible for download via the following link：https://pan.baidu.com/s/1l8gco3gRwcHUFLXHzne0WA?pwd=7an0 
