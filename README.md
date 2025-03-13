@@ -1,7 +1,7 @@
 # ReferSplat
 
 ---
-##Abstract
+## Abstract
 We introduce Referring 3D Gaussian Splatting
 Segmentation (R3DGS), a new task that focuses
 on segmenting target objects in a 3D Gaussian
