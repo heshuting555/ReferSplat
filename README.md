@@ -28,12 +28,13 @@ The **RefLERF dataset** is accessible for download via the following link:https:
 ```bash
 git clone https://github.com/jgq111/ReferSplat.git
 cd ReferSplat
----
+```
 ## Training
 ```bash
 python train.py -s data/figurines -m output/figurines
-
+```
 
 ## Render
 ```bash
 python render.py -m output/waldo_kitchen
+```
