@@ -21,7 +21,7 @@ task and 3D open-vocabulary segmentation benchmarks. Code, trained models, and t
 be publicly released.
 ![ReferSplat Example](teaser.png)
 ## Datasets
-The **RefLERF dataset** is accessible for download via the following link:https://pan.baidu.com/s/1H5XBYDGnqrkQInYxzmMgWA?pwd=wmus
+The **RefLERF dataset** is accessible for download via the following link:https://pan.baidu.com/s/1D9yDNfUrK-d8eGO33Avkpg?pwd=ugs3
 
 
 ## Cloning the Repository
