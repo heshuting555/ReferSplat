@@ -23,7 +23,7 @@ be publicly released.
 ## Datasets
 The **RefLERF dataset** is accessible for download via the following link:https://pan.baidu.com/s/1D9yDNfUrK-d8eGO33Avkpg?pwd=ugs3
 ```bash
-<path to dataset>
+<path to ref-lerf dataset>
 |---figurines
 |---ramen
 |---waldo_kitchen
@@ -53,11 +53,11 @@ conda activate refsplat
 ```bash
 python train.py -s <path to ref-lerf dataset> -m <path to output_model>
 <ref-lerf>
-|---data
+|---<path to ref-lerf dataset>
 |   |---<figurines>
 |   |---<ramen>
 |   |---...
-|---output
+|---<path to output_model>
     |---<figurines>
     |---<ramen>
     |---...
