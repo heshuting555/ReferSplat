@@ -34,13 +34,13 @@ The **RefLERF dataset** is accessible for download via the following link:https:
 The repository contains submodules, thus please check it out with
 ```bash
 #SSH
-git@github.com:heshuting555/ReferSplat.git
+git clone git@github.com:heshuting555/ReferSplat.git
 cd ReferSplat
 ```
 or
 ```bash
 #HTTPS
-git@github.com:heshuting555/ReferSplat.git
+git clone https://github.com/heshuting555/ReferSplat.git
 cd ReferSplat
 ```
 ## Setup
