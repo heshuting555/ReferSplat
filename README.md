@@ -43,7 +43,6 @@ conda activate refsplat
 ## Training
 ```bash
 python train.py -s <path to ref-lerf dataset> -m <path to output_model>
-```bash
 <ref-lerf>
 |---data
 |   |---<figurines>
@@ -53,7 +52,6 @@ python train.py -s <path to ref-lerf dataset> -m <path to output_model>
     |---<figurines>
     |---<ramen>
     |---...
-```
 ```
 
 ## Render
