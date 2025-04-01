@@ -34,11 +34,8 @@ def calculate_iou_for_directory(render_dir, gt_dir):
     mean_iou = np.mean(iou_list) if iou_list else 0.0
     return mean_iou
 
-iteration=5
-for i in range(iteration):
-    render_dir = 'LangSplat1/output/waldo_kitchen/testacc/ours_' + str(i) + '/renders/'
-    gt_dir = 'LangSplat1/output/waldo_kitchen/testacc/ours_' + str(i) + '/gt/'
-    
-    average_iou = calculate_iou_for_directory(render_dir, gt_dir)
-    print(f'iteration {i} Average IoU: {average_iou}')
+render_dir=''
+gt_dir=''
+average_iou = calculate_iou_for_directory(render_dir, gt_dir)
+print(f'iteration {i} Average IoU: {average_iou}')
 
