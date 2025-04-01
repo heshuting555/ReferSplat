@@ -1,4 +1,4 @@
-name: langsplat
+name: refsplat
 channels:
   - pytorch
   - conda-forge
