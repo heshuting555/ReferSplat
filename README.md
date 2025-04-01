@@ -22,11 +22,13 @@ be publicly released.
 ![ReferSplat Example](teaser.png)
 ## Datasets
 The **RefLERF dataset** is accessible for download via the following link:https://pan.baidu.com/s/1D9yDNfUrK-d8eGO33Avkpg?pwd=ugs3
+```bash
 <path to dataset>
 |---figurines
 |---ramen
 |---waldo_kitchen
 |---teatime
+```
 
 ## Cloning the Repository
 ```bash
@@ -41,6 +43,17 @@ conda activate refsplat
 ## Training
 ```bash
 python train.py -s <path to ref-lerf dataset> -m <path to output_model>
+```bash
+<ref-lerf>
+|---data
+|   |---<figurines>
+|   |---<ramen>
+|   |---...
+|---output
+    |---<figurines>
+    |---<ramen>
+    |---...
+```
 ```
 
 ## Render
