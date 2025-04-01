@@ -31,6 +31,7 @@ The **RefLERF dataset** is accessible for download via the following link:https:
 ```
 
 ## Cloning the Repository
+Our default, provided install method is based on Conda package and environment management:
 ```bash
 git clone https://github.com/jgq111/ReferSplat.git
 cd ReferSplat
