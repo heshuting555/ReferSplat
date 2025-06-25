@@ -67,3 +67,8 @@ python train.py -s <path to ref-lerf dataset> -m <path to output_model>
 ```bash
 python render.py -m <path to output_model>
 ```
+
+## Get pseudo mask
+```bash
+Please refer to the "Grounded-SAM: Detect and Segment Everything with Text Prompt" method in https://github.com/IDEA-Research/Grounded-Segment-Anything
+```
