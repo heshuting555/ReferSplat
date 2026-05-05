@@ -1,4 +1,5 @@
 import os
+import argparse
 import torch
 import numpy as np
 from PIL import Image
@@ -34,8 +35,13 @@ def calculate_iou_for_directory(render_dir, gt_dir):
     mean_iou = np.mean(iou_list) if iou_list else 0.0
     return mean_iou
 
-render_dir=''
-gt_dir=''
-average_iou = calculate_iou_for_directory(render_dir, gt_dir)
-print(f'iteration {i} Average IoU: {average_iou}')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--render_dir", type=str, required=True,
+                        help="Directory containing predicted mask PNGs")
+    parser.add_argument("--gt_dir", type=str, required=True,
+                        help="Directory containing ground-truth mask PNGs (same filenames)")
+    args = parser.parse_args()
+    average_iou = calculate_iou_for_directory(args.render_dir, args.gt_dir)
+    print(f'Average IoU: {average_iou}')
 
