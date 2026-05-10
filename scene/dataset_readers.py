@@ -107,6 +107,8 @@ def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder):
         parent_folder = Path(images_folder).parent
         mask_name=extr.name.replace('.jpg', '')
         gt_mask_folder = os.path.join(parent_folder, 'gt_mask')
+        if not os.path.isdir(gt_mask_folder):
+            gt_mask_folder = os.path.join(parent_folder, 'mask')
         if len(mask_name)==2:
            mask_name=int(mask_name)
            mask_name=f"frame_{mask_name:05d}"
@@ -117,18 +119,23 @@ def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder):
         with open(json_folder, 'r') as f:
             json_data = json.load(f)
             #print(json_data)
-  
+
         mask_sentence=[]
         for object in json_data['object']:
+            seg_path = os.path.join(gt_mask_folder, object['segmentation'])
+            if not os.path.exists(seg_path):
+                continue
             for i in range(len(object['sentence'])):
-                mask_sentence.append([os.path.join(gt_mask_folder, object['segmentation']), object['sentence'][i],object['category']])
+                mask_sentence.append([seg_path, object['sentence'][i],object['category']])
         random.shuffle(mask_sentence)
-        mask_sentence_array = np.array(mask_sentence)
-        unique_paths = list(set(mask_sentence_array[:, 0])) 
-        
-        gt_mask={path.split('/')[-1].split('_')[0].replace('.png', ''): Image.open(path) for path in unique_paths}
-        sentence=[path[1] for path in mask_sentence]
-        category=[path[2] for path in mask_sentence]
+        if len(mask_sentence) == 0:
+            gt_mask, sentence, category = {}, [], []
+        else:
+            mask_sentence_array = np.array(mask_sentence)
+            unique_paths = list(set(mask_sentence_array[:, 0]))
+            gt_mask={path.split('/')[-1].split('_')[0].replace('.png', ''): Image.open(path) for path in unique_paths}
+            sentence=[path[1] for path in mask_sentence]
+            category=[path[2] for path in mask_sentence]
 
         image_path = os.path.join(images_folder, os.path.basename(extr.name))
         image_name = os.path.basename(image_path).split(".")[0]
@@ -169,7 +176,7 @@ data_dict={
     'figurines':[83,97,146,179],
     'teatime':[2,25,43,107,129,140],
     'waldo':[19,35,67,105,162],
-    
+    'waldo_kitchen':[19,35,67,105,162],  # alias matching the README's documented directory name
 }
 def readColmapSceneInfo(path, images, eval, llffhold=8):
     try:

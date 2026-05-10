@@ -37,6 +37,7 @@ The **Ref-LERF dataset** is accessible for download via the following link: [bai
 |---waldo_kitchen
 |---teatime
 ```
+Each scene contains a `mask/` directory (test-only ground-truth masks) and a `gt_mask/` directory (covering all frames). The dataset loader automatically falls back to `mask/` when `gt_mask/` is absent.
 ## Checkpoints and Pseudo mask
 
 The **Checkpoints and Pseudo mask** are accessible for download via the following link:[googledrive](https://drive.google.com/drive/folders/1z9O2FWwUlE29lSgLDj9Af7sv5ZQv6sc_?usp=sharing) or [huggingface](https://huggingface.co/FudanCVL/RefSplat)
@@ -61,9 +62,20 @@ conda env create --file environment.yml
 conda activate refsplat
 ```
 ## Training
-Note: Before training, you need to train original [3DGS](https://github.com/graphdeco-inria/gaussian-splatting) to obtain pretrained Gaussians for RGB rendering.
+Note: Before training, you need to train original [3DGS](https://github.com/graphdeco-inria/gaussian-splatting) to obtain pretrained Gaussians for RGB rendering. Pass that pretrained checkpoint via `--start_checkpoint`; it is required.
+
 ```bash
-python train.py -s <path to ref-lerf dataset> -m <path to output_model>
+# <path to scene> is e.g. <ref-lerf>/ramen
+python train.py \
+    -s <path to scene> \
+    -m <path to output_model> \
+    --start_checkpoint <path to scene>/<scene>chkpnt30000.pth
+```
+
+Training runs for `--total_iters` iterations (default `45000`, matching the paper) and saves 10 evenly-spaced checkpoints named `chkpnt_cbasetea251{0..9}.pth`.
+
+Directory layout:
+```bash
 <ref-lerf>
 |---<path to ref-lerf dataset>
 |   |---<figurines>
@@ -77,8 +89,23 @@ python train.py -s <path to ref-lerf dataset> -m <path to output_model>
 
 ## Render
 ```bash
-python render.py -m <path to output_model>
+python render.py \
+    -m <path to output_model> \
+    --include_feature \
+    --skip_train \
+    --checkpoint_name chkpnt_cbasetea2519.pth \
+    --iteration 9
 ```
+`--checkpoint_name` selects which saved milestone to render; `--iteration` is the integer suffix used to organize the output folder under `<output_model>/testccc/ours_<iteration>/`.
+
+## Evaluation
+After rendering, compute mIoU between the predicted and ground-truth masks:
+```bash
+python test_miou.py \
+    --render_dir <path to output_model>/testccc/ours_<N>/renders \
+    --gt_dir     <path to output_model>/testccc/ours_<N>/gt
+```
+Sweep `<N>` across all saved milestones (`0..9`) and report the best mIoU.
 
 ## Get pseudo mask
 ```bash
