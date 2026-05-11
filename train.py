@@ -45,22 +45,32 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
     viewpoint_stack = None
     ema_loss_for_log = 0.0
     progress_bar = tqdm(range(first_iter, total_iters), desc="Training progress")
-    # Resume iteration counter from a saved ckpt instead of resetting to 1, so
-    # the τ ratio schedule continues smoothly across resumes.
-    iteration = max(1, first_iter)
+    # `iteration` counts completed optimization steps. A fresh run starts at 0
+    # and a checkpoint stored at step N resumes with iteration=N, so the
+    # τ ratio schedule continues smoothly across resumes.
+    iteration = first_iter
     ratio = max(0.005, 0.1 * (0.6 ** (iteration // 2000)))
     total_loss = []
     # Save 10 evenly-spaced checkpoints across [0, total_iters], using the
-    # original chkpnt_cbasetea251{0..9}.pth naming.
+    # original chkpnt_cbasetea251{0..9}.pth naming. Use `>=` so milestones
+    # already produced by an earlier run are skipped on resume; otherwise
+    # resuming from iteration == milestone[k] would overwrite that same
+    # checkpoint after one further step.
     save_milestones = [int(total_iters * (i + 1) / 10) for i in range(10)]
     next_save_idx = 0
-    while next_save_idx < len(save_milestones) and iteration > save_milestones[next_save_idx]:
+    while next_save_idx < len(save_milestones) and iteration >= save_milestones[next_save_idx]:
         next_save_idx += 1
 
     while iteration < total_iters:
         if not viewpoint_stack:
             viewpoint_stack = scene.getTrainCameras().copy()
         viewpoint_cam = viewpoint_stack.pop(randint(0, len(viewpoint_stack) - 1))
+        # Skip cameras without referring expressions (e.g. when the dataset
+        # only ships test-frame masks and the loader falls back to `mask/`);
+        # otherwise the inner sentence loop would not advance `iteration`
+        # and the outer loop would spin forever.
+        if len(viewpoint_cam.sentence) == 0:
+            continue
         text_feature = gaussians.get_text(viewpoint_cam.sentence).to("cuda")
         for i in range(len(viewpoint_cam.sentence)):
             if iteration >= total_iters:

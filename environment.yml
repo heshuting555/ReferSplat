@@ -20,6 +20,7 @@ dependencies:
   - typing
   - pathlib
   - pip:
+    - transformers
     - submodules/segment-anything-langsplat
     - submodules/langsplat-rasterization
     - submodules/simple-knn
