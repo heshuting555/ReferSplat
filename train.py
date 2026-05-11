@@ -42,6 +42,22 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
     iter_start = torch.cuda.Event(enable_timing=True)
     iter_end = torch.cuda.Event(enable_timing=True)
 
+    # Pre-filter training cameras: a camera with no referring expressions
+    # provides no training signal and would stall the iter-based outer
+    # loop. Fail fast if the whole training set comes back empty so we
+    # don't spin forever (e.g. when `gt_mask/` is missing and the loader
+    # falls back to the test-only `mask/` directory).
+    all_train_cameras = scene.getTrainCameras()
+    train_cameras = [c for c in all_train_cameras if len(c.sentence) > 0]
+    if len(train_cameras) == 0:
+        raise ValueError(
+            f"No training cameras with referring expressions were found "
+            f"({len(all_train_cameras)} cameras total, none with non-empty "
+            f"`sentence`). Check that the dataset's per-frame JSONs reference "
+            f"existing mask files and that `gt_mask/` (or the fallback `mask/`) "
+            f"contains the expected segmentations."
+        )
+
     viewpoint_stack = None
     ema_loss_for_log = 0.0
     progress_bar = tqdm(range(first_iter, total_iters), desc="Training progress")
@@ -63,14 +79,8 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
 
     while iteration < total_iters:
         if not viewpoint_stack:
-            viewpoint_stack = scene.getTrainCameras().copy()
+            viewpoint_stack = train_cameras.copy()
         viewpoint_cam = viewpoint_stack.pop(randint(0, len(viewpoint_stack) - 1))
-        # Skip cameras without referring expressions (e.g. when the dataset
-        # only ships test-frame masks and the loader falls back to `mask/`);
-        # otherwise the inner sentence loop would not advance `iteration`
-        # and the outer loop would spin forever.
-        if len(viewpoint_cam.sentence) == 0:
-            continue
         text_feature = gaussians.get_text(viewpoint_cam.sentence).to("cuda")
         for i in range(len(viewpoint_cam.sentence)):
             if iteration >= total_iters:
