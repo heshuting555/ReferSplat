@@ -90,6 +90,11 @@ if __name__ == "__main__":
     args = get_combined_args(parser)
     args.include_feature=True
     if args.iteration == -1:
-        args.iteration = 5
+        # Derive the output folder suffix from the checkpoint filename so
+        # that `ours_<N>/` always matches the milestone index of the ckpt
+        # being rendered (chkpnt_cbasetea251<N>.pth -> N). Falls back to 0
+        # if the filename does not match the milestone pattern.
+        m = re.search(r"chkpnt_cbasetea251(\d+)\.pth$", args.checkpoint_name)
+        args.iteration = int(m.group(1)) if m else 0
     model_path = args.checkpoint_name
     render_sets(model.extract(args), model_path, pipeline.extract(args), args.skip_train, args.skip_test, args)
