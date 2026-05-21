@@ -89,9 +89,10 @@ def render(viewpoint_camera, pc : GaussianModel, pipe, bg_color : torch.Tensor, 
     features=torch.matmul(g,t_token.transpose(-1,-2)).squeeze(0)
     features=features.sum(dim=-1,keepdim=True)
 
-    
-    sorted_indices = torch.argsort(features, descending=True)
-    indices = sorted_indices[:int(len(sorted_indices) * ratio)].squeeze(1)
+    scores = features.squeeze(-1)
+    sorted_indices = torch.argsort(scores, descending=True)
+    k_topk = max(1, int(scores.shape[0] * ratio))
+    indices = sorted_indices[:k_topk]
    
     selected_tensors = g[indices]
 
