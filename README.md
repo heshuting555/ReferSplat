@@ -7,6 +7,9 @@
     <a href="https://arxiv.org/abs/2508.08252">
       <img src='https://img.shields.io/badge/Paper-PDF-green?style=flat&logo=arXiv&' alt='arXiv PDF'>
     </a>
+    <a href="https://refersplat.github.io">
+      <img src='https://img.shields.io/badge/Project-Page-blue?style=flat' alt='Project Page'>
+    </a>
   </p>
 
 ## Abstract
