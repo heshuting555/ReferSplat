@@ -42,25 +42,34 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
     iter_start = torch.cuda.Event(enable_timing=True)
     iter_end = torch.cuda.Event(enable_timing=True)
 
-    viewpoint_stack = None
+    train_cameras = scene.getTrainCameras()
+    steps_per_epoch = sum(len(camera.sentence) for camera in train_cameras)
+    if steps_per_epoch == 0:
+        raise ValueError("No referring expressions found in the training cameras")
+
+    viewpoint_stack = []
     ema_loss_for_log = 0.0
-    progress_bar = tqdm(range(first_iter, total_iters), desc="Training progress")
-    # Resume iteration counter from a saved ckpt instead of resetting to 1, so
-    # the τ ratio schedule continues smoothly across resumes.
+    # Keep the original one-based counter for the contrastive schedule.
     iteration = max(1, first_iter)
     ratio = max(0.005, 0.1 * (0.6 ** (iteration // 2000)))
     total_loss = []
-    # Save 10 evenly-spaced checkpoints across [0, total_iters], using the
-    # original chkpnt_cbasetea251{0..9}.pth naming.
-    save_milestones = [int(total_iters * (i + 1) / 10) for i in range(10)]
+    if total_iters is None:
+        save_milestones = [iteration + steps_per_epoch * epoch for epoch in range(1, 6)]
+        total_iters = save_milestones[-1]
+    else:
+        save_milestones = [int(total_iters * (i + 1) / 10) for i in range(10)]
+
+    progress_bar = tqdm(range(iteration, total_iters), desc="Training progress")
     next_save_idx = 0
-    while next_save_idx < len(save_milestones) and iteration > save_milestones[next_save_idx]:
+    while next_save_idx < len(save_milestones) and iteration >= save_milestones[next_save_idx]:
         next_save_idx += 1
 
     while iteration < total_iters:
         if not viewpoint_stack:
-            viewpoint_stack = scene.getTrainCameras().copy()
+            viewpoint_stack = train_cameras.copy()
         viewpoint_cam = viewpoint_stack.pop(randint(0, len(viewpoint_stack) - 1))
+        if not viewpoint_cam.sentence:
+            continue
         text_feature = gaussians.get_text(viewpoint_cam.sentence).to("cuda")
         for i in range(len(viewpoint_cam.sentence)):
             if iteration >= total_iters:
@@ -123,9 +132,9 @@ if __name__ == "__main__":
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[7_000, 30_000])
     parser.add_argument("--start_checkpoint", type=str, default = 'output/teatime/chkpnt30000.pth')
-    parser.add_argument("--total_iters", type=int, default=45000,
-                        help="Total training iterations (paper §4.2 default 45000). "
-                             "Saves 10 evenly-spaced ckpts using chkpnt_cbasetea251{0..9}.pth.")
+    parser.add_argument("--total_iters", type=int,
+                        help="Use an iteration budget with 10 checkpoints. "
+                             "By default, train for 5 epochs and save once per epoch.")
     args = parser.parse_args(sys.argv[1:])
     args.save_iterations.append(args.iterations)
     print(args)

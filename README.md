@@ -75,7 +75,7 @@ python train.py \
     --start_checkpoint <path to scene>/<scene>chkpnt30000.pth
 ```
 
-Training runs for `--total_iters` iterations (default `45000`, matching the paper) and saves 10 evenly-spaced checkpoints named `chkpnt_cbasetea251{0..9}.pth`.
+By default, training runs for 5 epochs and saves one checkpoint per epoch as `chkpnt_cbasetea251{0..4}.pth`. To use the paper’s iteration budget, pass `--total_iters 45000` to save 10 evenly spaced checkpoints. When starting another 5-epoch run from a ReferSplat checkpoint, use a new output directory to retain the original checkpoints.
 
 Directory layout:
 ```bash
@@ -93,11 +93,12 @@ Directory layout:
 ## Render
 ```bash
 python render.py \
+    -s <path to scene> \
     -m <path to output_model> \
     --include_feature \
     --skip_train \
-    --checkpoint_name chkpnt_cbasetea2519.pth \
-    --iteration 9
+    --checkpoint_name chkpnt_cbasetea2514.pth \
+    --iteration 4
 ```
 `--checkpoint_name` selects which saved milestone to render; `--iteration` is the integer suffix used to organize the output folder under `<output_model>/testccc/ours_<iteration>/`.
 
@@ -108,7 +109,7 @@ python test_miou.py \
     --render_dir <path to output_model>/testccc/ours_<N>/renders \
     --gt_dir     <path to output_model>/testccc/ours_<N>/gt
 ```
-Sweep `<N>` across all saved milestones (`0..9`) and report the best mIoU.
+Sweep `<N>` across all saved checkpoints (`0..4` by default, or `0..9` with `--total_iters 45000`) and report the best mIoU.
 
 ## Get pseudo mask
 ```bash
